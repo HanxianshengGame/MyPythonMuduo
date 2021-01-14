@@ -5,13 +5,31 @@
 # @Time     : 2021/1/10 19:26
 # @Software : PyCharm
 # @Introduce: This is
-
-
+import logger
+from task import Task
 from socket_message_handler import send_msg_to_client, recv_msg_from_client
-from main import on_message, on_connection, on_close
+
+
+def on_connection(conn):
+    logger.simple_log('新的玩家连接：', conn.get_peer_addr())
+    pass
+
+
+def on_message(conn):
+    msg = conn.recv_msg()
+    logger.simple_log(conn.get_peer_addr(), "发来了消息：", msg)
+    if not msg:
+        return False
+    TcpConnection.compute_thread_pool.add_task(Task(conn, msg))
+    return True
+
+
+def on_close(conn):
+    logger.simple_log(conn.get_peer_addr(), ' close!')
 
 
 class TcpConnection:
+    compute_thread_pool = None
     __on_connection_callback = on_connection
     __on_message_callback = on_message
     __on_close_callback = on_close
@@ -28,9 +46,11 @@ class TcpConnection:
 
         pass
 
-    def set_loop_(self, event_loop):
+    def set_loop(self, event_loop):
         self.__event_loop = event_loop
 
+    def recv_msg(self):
+        return recv_msg_from_client(self.__sock)
 
     def send_msg(self, msg):
         send_msg_to_client(self.__sock, msg)
@@ -45,21 +65,14 @@ class TcpConnection:
     def get_peer_addr(self):
         return self.__peer_addr
 
-
     def get_fd(self):
         return self.__sock.fileno()
 
-    def get_socket(self):
-        return self.__sock
-
-    def recv_msg(self):
-        return recv_msg_from_client(self.__sock)
-
     def handle_message_callback(self):
-        self.__on_message_callback(self)
+        return TcpConnection.__on_message_callback(self)
 
     def handle_connection_callback(self):
-        self.__on_connection_callback(self)
+        TcpConnection.__on_connection_callback(self)
 
     def handle_close_callback(self):
-        self.__on_close_callback(self)
+        TcpConnection.__on_close_callback(self)

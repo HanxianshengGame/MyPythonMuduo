@@ -39,7 +39,6 @@ class Acceptor:
         self.__listen_sock.setblocking(False)
         pass
 
-
     def get_listen_fd(self):
         return self.__listen_sock.fileno()
 
@@ -48,3 +47,5 @@ class Acceptor:
         return client_sock, client_addr
 
     # 关闭监听
+    def close(self):
+        pass

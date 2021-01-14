@@ -5,9 +5,21 @@
 # @File    : compute_threadpool.py
 # @Software: PyCharm
 
-from compute_thread import ComputeThread
 from Queue import Queue
 from time import sleep
+from threading import Thread
+
+
+class ComputeThread(Thread):
+    def __init__(self, name, thread_func, args):
+        Thread.__init__(self)
+        self.name = name
+        self.__func = thread_func
+        self.__args = args
+        pass
+
+    def run(self):
+        self.__func(*self.__args)
 
 
 class ComputeThreadPool:
@@ -34,11 +46,10 @@ class ComputeThreadPool:
             for compute_thread in self.__compute_threads:
                 compute_thread.join()
 
-
     def start(self):
         for i in range(self.__thread_num):
             compute_thread = ComputeThread('thread' + str(i),
-                self.thread_func, ())
+                                           self.thread_func, ())
             self.__compute_threads.append(compute_thread)
 
         for compute_thread in self.__compute_threads:

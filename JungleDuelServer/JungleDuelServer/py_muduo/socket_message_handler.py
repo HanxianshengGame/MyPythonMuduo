@@ -38,7 +38,6 @@ def recv_fixed_sz_data(sock, recv_sz):
     result_data = ''
     while total < recv_sz:
         data = sock.recv(recv_sz - total)
-        print data
         if data:
             result_data += data
             total += len(data)
@@ -54,6 +53,7 @@ def send_fixed_sz_data(sock, data):
     pass
 
 
+# decode 解包
 def recv_msg_from_client(sock):
     """
     TODO 涉及拆包的逻辑
@@ -64,7 +64,6 @@ def recv_msg_from_client(sock):
     if not len_data:
         return None
     data_len = bytes_to_int(len_data)
-    print data_len
 
     msg_data = recv_fixed_sz_data(sock, data_len)
     if not msg_data:
@@ -73,6 +72,7 @@ def recv_msg_from_client(sock):
     return msg
 
 
+# encode 装包
 def send_msg_to_client(sock, msg):
     """
     涉及装包的逻辑

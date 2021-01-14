@@ -14,12 +14,10 @@ class Task:
     def process(self):
         """
         该函数会交付给线程池处理
-
         :return:
         """
-        # decode
         # compute
-        # encode
         # 拿到最终结果
         response = self.__msg
+        # 发送
         self.__conn.send_in_loop(response)

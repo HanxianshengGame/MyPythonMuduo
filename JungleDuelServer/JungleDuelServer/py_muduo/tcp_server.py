@@ -6,11 +6,9 @@
 # @Software : PyCharm
 # @Introduce: This is
 
-from sub_reactor_threadpool import SubReactorThreadPool
 from acceptor import Acceptor
 from acceptor_loop import AcceptorLoop
-
-
+from sub_reactor_threadpool import SubReactorThreadPool
 
 
 class TcpServer:
@@ -26,10 +24,5 @@ class TcpServer:
         self.__loop.loop(self.__sub_reactors)
         pass
 
-
-
-
     def close(self):
         pass
-
-
