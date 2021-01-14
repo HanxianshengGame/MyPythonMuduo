@@ -40,15 +40,14 @@ class EventLoop:
         self.__get_conn_func(fd).close()
         self.__remove_conn_func(fd)
 
-
     def run_in_loop(self, send_func, msg):
-        self.__lock.acquire()
+        self.__lock.acquire(True)
         self.__send_funcs.append((send_func, msg))
         self.__lock.release()
         self.wake_up_self(Flag.SEND_MSG_TO_CLIENT)
 
     def do_send_funcs(self):
-        self.__lock.acquire()
+        self.__lock.acquire(True)
         tmp = deepcopy(self.__send_funcs)
         self.__send_funcs = []
         self.__lock.release()
