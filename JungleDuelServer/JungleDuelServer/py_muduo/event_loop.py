@@ -8,7 +8,6 @@ import errno
 import select
 import logger
 import socket
-from copy import deepcopy
 from socket_message_handler import Flag, recv_flag, send_flag
 from threading import Lock
 
@@ -48,7 +47,7 @@ class EventLoop:
 
     def do_send_funcs(self):
         self.__lock.acquire(True)
-        tmp = deepcopy(self.__send_funcs)
+        tmp = self.__send_funcs
         self.__send_funcs = []
         self.__lock.release()
         for send_func, msg in tmp:
@@ -89,16 +88,15 @@ class EventLoop:
                             while True:
                                 is_success = conn.handle_message_callback()
                                 if not is_success:
-                                    self.__handle_conn_close(fd)
                                     conn.handle_close_callback()
+                                    self.__handle_conn_close(fd)
                                     break
 
                         except socket.error as error_msg:
                             if error_msg.errno != errno.EAGAIN:
                                 self.__handle_conn_close(fd)
-                                conn.handle_close_callback()
 
                     elif event & select.EPOLLHUP:
-                        self.__handle_conn_close(fd)
                         conn.handle_close_callback()
+                        self.__handle_conn_close(fd)
                         pass
