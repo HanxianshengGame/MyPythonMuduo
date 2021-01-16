@@ -5,34 +5,13 @@
 # @Time     : 2021/1/10 19:26
 # @Software : PyCharm
 # @Introduce: This is
-import logger
-from task import Task
-from socket_message_handler import send_msg_to_client, recv_msg_from_client
-
-
-def on_connection(conn):
-    logger.simple_log('新的玩家连接：', conn.get_peer_addr())
-    pass
-
-
-def on_message(conn):
-    msg = conn.recv_msg()
-    logger.simple_log(conn.get_peer_addr(), "发来了消息：", msg)
-    if not msg:
-        return False
-    TcpConnection.compute_thread_pool.add_task(Task(conn, msg))
-    return True
-
-
-def on_close(conn):
-    logger.simple_log(conn.get_peer_addr(), ' close!')
+from socket_message_handler import send_fixed_sz_data,  MessageHandler
 
 
 class TcpConnection:
-    compute_thread_pool = None
-    __on_connection_callback = on_connection
-    __on_message_callback = on_message
-    __on_close_callback = on_close
+    on_connection_callback = None
+    on_message_callback = None
+    on_close_callback = None
 
     def __init__(self, client_sock):
         self.__sock = client_sock
@@ -43,6 +22,7 @@ class TcpConnection:
         self.__sock.setblocking(False)
         self.__local_addr = client_sock.getsockname()
         self.__peer_addr = client_sock.getpeername()
+        self.__msg_handler = MessageHandler()
 
         pass
 
@@ -50,10 +30,24 @@ class TcpConnection:
         self.__event_loop = event_loop
 
     def recv_msg(self):
-        return recv_msg_from_client(self.__sock)
+        while True:
+            # 1. recv 如果本次接收时缓冲区无数据抛出异常，（errorno == 11）
+            # 2. recv 如果本次接收时对端关闭返回None
+            # 3. recv 如果接收的消息不足以解析，或者这边缓冲区仅有 4（11）+ 10，
+            # 接收到存储到 msg_data 中，之后按1的处理，等待下次epollin的响应
+            data = self.__sock.recv(1024)
+            if not data:
+                break
+            self.__msg_handler.append_new_data(data)
+            msgs = self.__msg_handler.decode_message_data()
+            if len(msgs):
+                return msgs, False
+        return [], True
 
     def send_msg(self, msg):
-        send_msg_to_client(self.__sock, msg)
+        data = self.__msg_handler.encode_msg(msg)
+        send_fixed_sz_data(self.__sock, data)
+        pass
 
     def send_in_loop(self, msg):
         if self.__event_loop:
@@ -69,10 +63,10 @@ class TcpConnection:
         return self.__sock.fileno()
 
     def handle_message_callback(self):
-        return TcpConnection.__on_message_callback(self)
+        return TcpConnection.on_message_callback(self)
 
     def handle_connection_callback(self):
-        TcpConnection.__on_connection_callback(self)
+        TcpConnection.on_connection_callback(self)
 
     def handle_close_callback(self):
-        TcpConnection.__on_close_callback(self)
+        TcpConnection.on_close_callback(self)

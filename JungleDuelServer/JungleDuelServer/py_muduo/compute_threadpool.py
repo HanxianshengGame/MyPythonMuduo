@@ -5,7 +5,8 @@
 # @File    : compute_threadpool.py
 # @Software: PyCharm
 
-from Queue import Queue
+import logger
+from Queue import Queue, Empty
 from time import sleep
 from threading import Thread
 
@@ -29,21 +30,22 @@ class ComputeThreadPool:
         self.__is_exit = False
         self.__compute_threads = []
         self.__task_que = Queue(task_que_sz)
-
         pass
 
     def add_task(self, task):
         self.__task_que.put(task, True)
 
     def get_task(self):
-        return self.__task_que.get(True)
+        return self.__task_que.get(True, 2.0)
 
     def stop(self):
         if not self.__is_exit:
             while not self.__task_que.empty():
                 sleep(1)
             self.__is_exit = True
+            # self.__task_que.join()
             for compute_thread in self.__compute_threads:
+                logger.simple_log('正在关闭', compute_thread.name)
                 compute_thread.join()
 
     def start(self):
@@ -57,5 +59,9 @@ class ComputeThreadPool:
 
     def thread_func(self):
         while not self.__is_exit:
-            task = self.get_task()
-            task.process()
+            try:
+                task = self.get_task()
+                task.process()
+
+            except Empty as msg:
+                continue

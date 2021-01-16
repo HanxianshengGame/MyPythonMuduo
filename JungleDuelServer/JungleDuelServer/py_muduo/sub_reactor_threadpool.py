@@ -45,6 +45,9 @@ class SubReactorThread(Thread):
         logger.simple_log('正在运做')
         self.__loop.loop()
 
+    def stop(self):
+        self.__loop.un_loop()
+
     def get_conn_count(self):
         return len(self.__fd_to_conns.keys())
 
@@ -67,7 +70,12 @@ class SubReactorThreadPool:
             reactor.start()
 
     def stop(self):
-        pass
+        for reactor in self.__reactors:
+            reactor.stop()
+
+        for reactor in self.__reactors:
+            logger.simple_log('正在关闭 ', reactor.name)
+            reactor.join()
 
     def assign_new_conn(self, conn):
         logger.simple_log('正在分配新连接')

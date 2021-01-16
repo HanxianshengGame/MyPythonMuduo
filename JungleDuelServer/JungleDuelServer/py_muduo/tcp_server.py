@@ -6,6 +6,7 @@
 # @Software : PyCharm
 # @Introduce: This is
 
+import logger
 from acceptor import Acceptor
 from acceptor_loop import AcceptorLoop
 from sub_reactor_threadpool import SubReactorThreadPool
@@ -25,4 +26,8 @@ class TcpServer:
         pass
 
     def close(self):
+        logger.simple_log('正在停止新连接的接收')
+        self.__loop.un_loop()
+        logger.simple_log('正在关闭 reactors')
+        self.__sub_reactors.stop()
         pass

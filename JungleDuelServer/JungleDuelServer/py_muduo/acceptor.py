@@ -7,8 +7,6 @@
 # @Introduce: This is
 
 import socket
-
-
 class Acceptor:
 
     def __init__(self, ip, port):
@@ -46,6 +44,4 @@ class Acceptor:
         client_sock, client_addr = self.__listen_sock.accept()
         return client_sock, client_addr
 
-    # 关闭监听
-    def close(self):
-        pass
+

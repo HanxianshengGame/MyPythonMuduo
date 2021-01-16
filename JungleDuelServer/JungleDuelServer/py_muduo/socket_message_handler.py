@@ -53,39 +53,6 @@ def send_fixed_sz_data(sock, data):
     pass
 
 
-# decode 解包
-def recv_msg_from_client(sock):
-    """
-    TODO 涉及拆包的逻辑
-    :param sock:
-    :return:
-    """
-    len_data = recv_fixed_sz_data(sock, 4)
-    if not len_data:
-        return None
-    data_len = bytes_to_int(len_data)
-
-    msg_data = recv_fixed_sz_data(sock, data_len)
-    if not msg_data:
-        return None
-    msg = bytes_to_str(msg_data, data_len)
-    return msg
-
-
-# encode 装包
-def send_msg_to_client(sock, msg):
-    """
-    涉及装包的逻辑
-    :param sock:
-    :param msg:
-    :return:
-    """
-    msg_data = str_to_bytes(msg)
-    len_data = int_to_bytes(len(msg_data))
-    send_fixed_sz_data(sock, len_data + msg_data)
-    pass
-
-
 def recv_flag(read_sock):
     flag_data = recv_fixed_sz_data(read_sock, 4)
     return bytes_to_int(flag_data)
@@ -96,9 +63,45 @@ def send_flag(write_sock, flag):
     send_fixed_sz_data(write_sock, flag_data)
 
 
+class MessageHandler:
+
+    def __init__(self):
+        self.__data = bytearray()
+        self.__end_index = 0
+        self.__msgs = []
+        pass
+
+    def append_new_data(self, data):
+        self.__data.extend(data)
+        self.__end_index += len(data)
+
+    def decode_message_data(self):
+        while True:
+            if self.__end_index <= 4:
+                break
+            msg_len = bytes_to_int(self.__data[0:4])
+            if self.__end_index - 4 >= msg_len:
+                msg = bytes_to_str(self.__data[4:4+msg_len], msg_len)
+                self.__msgs.append(msg)
+                self.__data = self.__data[4 + msg_len:]
+                self.__end_index -= (4 + msg_len)
+            else:
+                break
+        result_msgs = self.__msgs
+        self.__msgs = []
+        return result_msgs
+
+    @classmethod
+    def encode_msg(cls, msg):
+        msg_data = str_to_bytes(msg)
+        len_data = int_to_bytes(len(msg_data))
+        return len_data + msg_data
+
+
 class Flag:
     ADD_NEW_CONN_EVENT = 0
     SEND_MSG_TO_CLIENT = 1
+    BUFFER_SIZE = 1024
 
     def __init__(self):
         pass
