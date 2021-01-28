@@ -4,10 +4,8 @@
 # @Author  : handling
 # @File    : event_loop.py
 # @Software: PyCharm
-import errno
 import select
 import logger
-import socket
 import errno
 import socket
 from socket_message_handler import Flag, recv_flag, send_flag

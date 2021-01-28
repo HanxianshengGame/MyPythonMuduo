@@ -36,7 +36,7 @@ class ComputeThreadPool:
         self.__task_que.put(task, True)
 
     def get_task(self):
-        return self.__task_que.get(True, 2.0)
+        return self.__task_que.get(True, 1.0)
 
     def stop(self):
         if not self.__is_exit:
