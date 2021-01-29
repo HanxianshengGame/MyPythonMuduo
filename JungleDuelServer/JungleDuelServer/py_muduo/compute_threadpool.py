@@ -43,7 +43,6 @@ class ComputeThreadPool:
             while not self.__task_que.empty():
                 sleep(1)
             self.__is_exit = True
-            # self.__task_que.join()
             for compute_thread in self.__compute_threads:
                 logger.simple_log('正在关闭', compute_thread.name)
                 compute_thread.join()

@@ -80,7 +80,6 @@ class EventLoop:
                         if flag == Flag.ADD_NEW_CONN_EVENT:
                             new_conn = self.__get_new_conn_func()
                             self.__register_listen_fd(new_conn.get_fd())
-                            new_conn.handle_connection_callback()
                             logger.simple_log('分配到了新连接： ', new_conn.get_peer_addr())
 
                         elif flag == Flag.SEND_MSG_TO_CLIENT:

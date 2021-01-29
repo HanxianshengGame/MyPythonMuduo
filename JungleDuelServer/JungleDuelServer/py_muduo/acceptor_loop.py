@@ -37,8 +37,9 @@ class AcceptorLoop:
                 # 有玩家连接
                 for i in range(len(events)):
                     client_sock, client_addr = self.__acceptor.accept()
-
-                    sub_reactors.assign_new_conn(TcpConnection(client_sock))
+                    new_conn = TcpConnection(client_sock)
+                    new_conn.handle_connection_callback()
+                    sub_reactors.assign_new_conn(new_conn)
             except IOError as error:
                 if error.errno == errno.EINTR:
                     continue
