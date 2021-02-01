@@ -108,6 +108,11 @@ class EventLoop:
                             conn.handle_close_callback()
                             self.__handle_conn_close(fd)
                             pass
+                        else:
+                            print u'客户端出现了未知错误，及时关闭'
+                            conn.handle_close_callback()
+                            self.__handle_conn_close(fd)
+                            pass
             except IOError as error:
                 if error.errno == errno.EINTR:
                     continue
