@@ -23,7 +23,6 @@ class TcpConnection:
         self.__local_addr = client_sock.getsockname()
         self.__peer_addr = client_sock.getpeername()
         self.__msg_handler = MessageHandler()
-
         pass
 
     def set_loop(self, event_loop):

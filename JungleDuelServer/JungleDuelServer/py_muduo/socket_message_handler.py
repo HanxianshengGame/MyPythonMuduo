@@ -8,7 +8,6 @@
 
 import struct
 
-
 def int_to_bytes(convert_val):
     format_str = '<i'
     s = struct.Struct(format_str)
